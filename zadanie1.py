@@ -3,6 +3,26 @@ from matplotlib.widgets import Slider
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
+def deg2rad(deg):
+    return (deg/180)*np.pi
+
+def calculatePoints(pointMatrix, fi1, fi2, fi3):
+    global l1, l2, l3
+
+    origin = np.array([0, 0, 0, 1])
+
+    A = rotate("z", origin, deg2rad(fi1))
+    A = translate("z", A, l1)
+
+    B = rotate("x", A, deg2rad(fi2))
+    B = translate("z", B, l2)
+
+    C = rotate("x", B, deg2rad(fi3))
+    C = translate("z", C, l3)
+
+    pointMatrix = np.vstack((origin[:3], A[:3], B[:3], C[:3]))
+
+    return pointMatrix
 
 def translate(mode, input_matrix, d):
     Tx = np.array([
@@ -24,14 +44,15 @@ def translate(mode, input_matrix, d):
         [0, 0, 0, 1]])
     
     if mode == "x":
-        return Tx.dot(input_matrix.T)
+        return np.matmul(Tx, input_matrix.T)
     if mode == "y":
-        return Ty.dot(input_matrix.T)
+        return np.matmul(Ty, input_matrix.T)
     if mode == "z":
-        return Tz.dot(input_matrix.T)
+        return np.matmul(Tz, input_matrix.T)
 
 
 def rotate(mode, input_matrix, angle):
+
     Rx = np.array([
         [1, 0, 0, 0],
         [0, np.cos(angle), -1*(np.sin(angle)), 0],
@@ -51,13 +72,14 @@ def rotate(mode, input_matrix, angle):
         [0, 0, 0, 1]])
     
     if mode == "x":
-        return Rx.dot(input_matrix.T)
+        return np.matmul(Rx, input_matrix.T)
     if mode == "y":
-        return Ry.dot(input_matrix.T)
+        return np.matmul(Ry, input_matrix.T)
     if mode == "z":
-        return Rz.dot(input_matrix.T)
+        return np.matmul(Rz, input_matrix.T)
 
 # -------------
+
 matrix_one = np.array([
     [1, 0, 0],
     [0, 1, 0],
@@ -70,9 +92,9 @@ vector_one = np.array([
     ])
 
 # zadanie [mm]
-l1 = 203
-l2 = 178
-l3 = 178
+l1 = 203 # 203
+l2 = 178 # 381
+l3 = 178 # 559
 
 fi1_min = -90
 fi1_max = 90
@@ -88,38 +110,8 @@ fi1 = 0
 fi2 = 0
 fi3 = 0
 
-# matice
-# origin = np.array([[0],
-#                    [0],
-#                    [0],
-#                    [1]
-#                    ])
-origin = np.array([0., 0., 0., 1])
-
-# manipulator setup
-global A, B, C
-
-A = translate("z", origin, l1)
-print('A')
-print(A)
-
-B = rotate("y", A, fi2)
-B = rotate("z", B, fi1)
-B = translate("z", B, l2)
-print('B')
-print(B)
-
-C = rotate("x", B, fi3)
-C = translate("z", C, l3)
-print('C')
-print(C)
-
-points = [0, 0, 0, 0]
-vector = [0, 0, 0]
-print()
-# vektory bodov (x,y,z)
-points = np.vstack((origin[:3], A[:3], B[:3], C[:3]))
-
+points = []
+points = calculatePoints(points, fi1, fi2, fi3)
 print(points)
 
 # figure
@@ -142,27 +134,22 @@ for i in range(len(points)-1):
 sliders = []
 
 # plt.axes([left, bottom, width, height], ...) - suradnice pre box
-slider_fi1 = Slider(plt.axes([0.25, 0.06, 0.65, 0.03]), f'fi1', fi1_min, fi1_max, valinit=0)
-slider_fi2 = Slider(plt.axes([0.25, 0.03, 0.65, 0.03]), f'f2', fi2_min, fi2_max, valinit=0)
-slider_fi3 = Slider(plt.axes([0.25, 0, 0.65, 0.03]), f'f3', fi3_min, fi3_max, valinit=0)
+slider_fi1 = Slider(plt.axes([0.25, 0.06, 0.65, 0.03]), f'fi1', fi1_min, fi1_max, valinit=fi1)
+slider_fi2 = Slider(plt.axes([0.25, 0.03, 0.65, 0.03]), f'f2', fi2_min, fi2_max, valinit=fi2)
+slider_fi3 = Slider(plt.axes([0.25, 0, 0.65, 0.03]), f'f3', fi3_min, fi3_max, valinit=fi3)
 sliders.append((slider_fi1, slider_fi2, slider_fi3))
 
 
 # Update the plot whenever a slider value changes
 def update(val):
-    B_new = rotate("y", B, slider_fi2.val)
-    B_new = rotate("z", B, slider_fi1.val)
+    global points
 
-    C_new = rotate("x", B, slider_fi3.val)
-
-    points = np.vstack((origin[:3], A[:3], B_new[:3], C_new[:3]))
+    points = calculatePoints(points, slider_fi1.val, slider_fi2.val, slider_fi3.val)
 
     scatter._offsets3d = (points[:, 0], points[:, 1], points[:, 2])
 
-    print(A)
-    print(B)
-    print(C)
-    print()
+    print(points)
+
     for i in range(len(lines)):
         xs = [points[i, 0], points[i+1, 0]]
         ys = [points[i, 1], points[i+1, 1]]
@@ -173,6 +160,7 @@ def update(val):
 
 
 for slider_fi1, slider_fi2, slider_fi3 in sliders:
+    # posielame parametre kvoli shadowing
     slider_fi1.on_changed(update)
     slider_fi2.on_changed(update)
     slider_fi3.on_changed(update)
