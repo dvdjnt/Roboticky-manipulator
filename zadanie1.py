@@ -3,22 +3,79 @@ from matplotlib.widgets import Slider
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
+"""
+skusit transformacie po jednom bode, po jednej transformacii
+najprv translate potom rotate? asi nooo nehehehe
+
+"""
 def deg2rad(deg):
     return (deg/180)*np.pi
 
-def calculatePoints(pointMatrix, fi1, fi2, fi3):
-    global l1, l2, l3
+def calculateB(origin, fi1, fi2, l2):
+    d = l2+l1
+    print(l2+l1)
+    B_matrix = np.array([
+        [np.cos(fi2), -np.sin(fi2), 0, 0],
+        [np.cos(fi1)*np.sin(fi2), np.cos(fi1)*np.cos(fi2), -np.sin(fi1)*d, 0],
+        [np.sin(fi1)*np.sin(fi2), np.sin(fi1)*np.cos(fi2), np.cos(fi1)*d, 0],
+        [0, 0, 0, 1]
+    ])
+    return np.matmul(B_matrix, origin.T)
+
+def calculateB1(origin, fi1, fi2, l2):
+    d = l2
+    B_matrix = np.array([
+        [np.cos(fi2), -np.sin(fi2), 0, 0],
+        [np.cos(fi1)*np.sin(fi2), np.cos(fi1)*np.cos(fi2), -np.sin(fi1), 0],
+        [np.sin(fi1)*np.sin(fi2), np.sin(fi1)*np.cos(fi2), np.cos(fi1), 0],
+        [0, 0, 0, d]
+    ])
+    return np.matmul(B_matrix, origin.T)
+
+def calculateA(origin, l1):
+    d = l1
+    Tz = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, d],
+        [0, 0, 0, 1]])
+    return np.matmul(Tz, origin.T)
+
+def calculatePoints(pointMatrix, fi1, fi2, fi3, l1, l2, l3):
+    fi1 = deg2rad(fi1)
+    fi2 = deg2rad(fi2)
+    fi3 = deg2rad(fi3)
 
     origin = np.array([0, 0, 0, 1])
 
-    A = rotate("z", origin, deg2rad(fi1))
-    A = translate("z", A, l1)
+    # vectors of coordinate system
+    relativeSystem = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
 
-    B = rotate("x", A, deg2rad(fi2))
-    B = translate("z", B, l2)
+    # postupne: -> posuvat si origin
+    # transformujeme postupne body v serii
+    # rotacie vzdy robime od predchadzajuceho bodu
+    #
+    # jedna matica pre kazdy bod: -> postupne pridavat transform k resultu (ale odzadu)
+    # sekvencne ale odzadu, mozno inverzne ukony..
 
-    C = rotate("x", B, deg2rad(fi3))
-    C = translate("z", C, l3)
+    # A - translate(z,l1) od origin
+    # B - translate(z,l2)->rotate(x,fi2)->rotate(y,fi1) od A
+    # C - translate(z,l3)->rotate(x,fi3)
+
+    currentPoint = origin
+    currentPoint = translate("z", currentPoint, l3)
+    currentPoint = rotate("x", fi3)
+    C = currentPoint
+
+
+    currentPoint = translate("z", currentPoint, l2)
+    currentPoint = rotate("x", currentPoint, fi2)
+    currentPoint = rotate("z", currentPoint, fi1)
+    B = currentPoint
+
+    currentPoint = translate("z", currentPoint, l3)
+    currentPoint = rotate("x", currentPoint, fi3)
+    C = currentPoint
 
     pointMatrix = np.vstack((origin[:3], A[:3], B[:3], C[:3]))
 
@@ -49,8 +106,6 @@ def translate(mode, input_matrix, d):
         return np.matmul(Ty, input_matrix.T)
     if mode == "z":
         return np.matmul(Tz, input_matrix.T)
-
-
 def rotate(mode, input_matrix, angle):
 
     Rx = np.array([
@@ -79,7 +134,6 @@ def rotate(mode, input_matrix, angle):
         return np.matmul(Rz, input_matrix.T)
 
 # -------------
-
 matrix_one = np.array([
     [1, 0, 0],
     [0, 1, 0],
@@ -103,7 +157,7 @@ fi2_min = -55
 fi2_max = 125
 
 fi3_min = 0
-fi3_max = 150
+fi3_max = 150   #zadanie
 
 # uhly
 fi1 = 0
@@ -111,7 +165,7 @@ fi2 = 0
 fi3 = 0
 
 points = []
-points = calculatePoints(points, fi1, fi2, fi3)
+points = calculatePoints(points, fi1, fi2, fi3, l1, l2, l3)
 print(points)
 
 # figure
@@ -144,7 +198,7 @@ sliders.append((slider_fi1, slider_fi2, slider_fi3))
 def update(val):
     global points
 
-    points = calculatePoints(points, slider_fi1.val, slider_fi2.val, slider_fi3.val)
+    points = calculatePoints(points, slider_fi1.val, slider_fi2.val, slider_fi3.val, l1, l2, l3)
 
     scatter._offsets3d = (points[:, 0], points[:, 1], points[:, 2])
 
