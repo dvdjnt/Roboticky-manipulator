@@ -41,7 +41,25 @@ def calculateA(origin, l1):
         [0, 0, 0, 1]])
     return np.matmul(Tz, origin.T)
 
-def calculatePoints(pointMatrix, fi1, fi2, fi3, l1, l2, l3):
+# Update the plot whenever a slider value changes
+def update(val, points):
+    # points not used??? check!
+
+    points = calculatePoints(slider_fi1.val, slider_fi2.val, slider_fi3.val, l1, l2, l3)
+
+    scatter._offsets3d = (points[:, 0], points[:, 1], points[:, 2])
+
+    print(points)
+
+    for i in range(len(lines)):
+        xs = [points[i, 0], points[i+1, 0]]
+        ys = [points[i, 1], points[i+1, 1]]
+        zs = [points[i, 2], points[i+1, 2]]
+        lines[i].set_data(xs, ys)
+        lines[i].set_3d_properties(zs)
+    fig.canvas.draw_idle()
+
+def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
     fi1 = deg2rad(fi1)
     fi2 = deg2rad(fi2)
     fi3 = deg2rad(fi3)
@@ -64,22 +82,29 @@ def calculatePoints(pointMatrix, fi1, fi2, fi3, l1, l2, l3):
 
     currentPoint = origin
     currentPoint = translate("z", currentPoint, l3)
-    currentPoint = rotate("x", fi3)
-    C = currentPoint
-
+    currentPoint = rotate("x", currentPoint, fi3)
 
     currentPoint = translate("z", currentPoint, l2)
     currentPoint = rotate("x", currentPoint, fi2)
     currentPoint = rotate("z", currentPoint, fi1)
-    B = currentPoint
 
-    currentPoint = translate("z", currentPoint, l3)
-    currentPoint = rotate("x", currentPoint, fi3)
+    currentPoint = translate("z", currentPoint, l1)
     C = currentPoint
+    # ----------------------------------------------------
+    currentPoint = origin
 
-    pointMatrix = np.vstack((origin[:3], A[:3], B[:3], C[:3]))
+    currentPoint = translate("z", currentPoint, l2)
+    currentPoint = rotate("x", currentPoint, fi2)
+    currentPoint = rotate("z", currentPoint, fi1)
 
-    return pointMatrix
+    currentPoint = translate("z", currentPoint, l1)
+    B = currentPoint
+    # ---------------------------------------------------
+    currentPoint = origin
+    currentPoint = translate("z", currentPoint, l1)
+    A = currentPoint
+
+    return np.vstack((origin[:3], A[:3], B[:3], C[:3]))
 
 def translate(mode, input_matrix, d):
     Tx = np.array([
@@ -164,8 +189,7 @@ fi1 = 0
 fi2 = 0
 fi3 = 0
 
-points = []
-points = calculatePoints(points, fi1, fi2, fi3, l1, l2, l3)
+points = calculatePoints(fi1, fi2, fi3, l1, l2, l3)
 print(points)
 
 # figure
@@ -193,35 +217,17 @@ slider_fi2 = Slider(plt.axes([0.25, 0.03, 0.65, 0.03]), f'f2', fi2_min, fi2_max,
 slider_fi3 = Slider(plt.axes([0.25, 0, 0.65, 0.03]), f'f3', fi3_min, fi3_max, valinit=fi3)
 sliders.append((slider_fi1, slider_fi2, slider_fi3))
 
-
-# Update the plot whenever a slider value changes
-def update(val):
-    global points
-
-    points = calculatePoints(points, slider_fi1.val, slider_fi2.val, slider_fi3.val, l1, l2, l3)
-
-    scatter._offsets3d = (points[:, 0], points[:, 1], points[:, 2])
-
-    print(points)
-
-    for i in range(len(lines)):
-        xs = [points[i, 0], points[i+1, 0]]
-        ys = [points[i, 1], points[i+1, 1]]
-        zs = [points[i, 2], points[i+1, 2]]
-        lines[i].set_data(xs, ys)
-        lines[i].set_3d_properties(zs)
-    fig.canvas.draw_idle()
-
-
 for slider_fi1, slider_fi2, slider_fi3 in sliders:
-    # posielame parametre kvoli shadowing
-    slider_fi1.on_changed(update)
-    slider_fi2.on_changed(update)
-    slider_fi3.on_changed(update)
+
+    # posielame parametre kvoli shadowing / global word
+    slider_fi1.on_changed(lambda val: update(val, points))
+    slider_fi2.on_changed(lambda val: update(val, points))
+    slider_fi3.on_changed(lambda val: update(val, points))
 
 # plot config
-plt.xlabel('X')
-plt.ylabel('Y')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
 ax.set_title('roboticky manipulator 3D', loc='center', fontsize=25)
 ax.axis('equal')
 fig.subplots_adjust(top=0.9, bottom=0.15)
