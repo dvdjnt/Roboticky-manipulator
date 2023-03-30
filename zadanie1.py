@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
-from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.widgets import Button
 import numpy as np
 
 """
@@ -10,7 +10,6 @@ date: april 2023
 
 def deg2rad(deg):
     return (deg/180)*np.pi
-
 def calculateA(origin, l1):
     A_matrix = np.array([
         [1, 0, 0, 0],
@@ -18,7 +17,6 @@ def calculateA(origin, l1):
         [0, 0, 1, l1],
         [0, 0, 0, 1]])
     return np.matmul(A_matrix, origin.T)
-
 def calculateB(origin, fi1, fi2, l2):
     B_matrix = np.array([
         [np.cos(fi1), -np.sin(fi1)*np.cos(fi2), np.sin(fi1)*np.sin(fi2), np.sin(fi1)*np.sin(fi2)*l2],
@@ -27,7 +25,6 @@ def calculateB(origin, fi1, fi2, l2):
         [0, 0, 0, 1]
     ])
     return np.matmul(B_matrix, origin.T)
-
 def calculateC(origin, fi1, fi2, fi3, l2, l3):
     C_matrix = np.array([
         [np.cos(fi1), np.sin(fi1)*(-np.cos(fi2+fi3)), np.sin(fi1)*np.sin(fi2+fi3), np.sin(fi1)*(l3*(np.sin(fi2+fi3))+l2*np.sin(fi2))],
@@ -36,9 +33,6 @@ def calculateC(origin, fi1, fi2, fi3, l2, l3):
         [0, 0, 0, 1]
     ])
     return np.matmul(C_matrix, origin.T)
-
-
-
 # Update the plot whenever a slider value changes
 def update(val, points):
     # points not used??? check!
@@ -102,11 +96,10 @@ def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
     # currentPoint = translate("z", currentPoint, l1)
     # A = currentPoint
     A = calculateA(origin, l1)
-    B = calculateB(origin,fi1, fi2, l2)
+    B = calculateB(origin, fi1, fi2, l2)
     C = calculateC(origin, fi1, fi2, fi3, l2, l3)
 
     return np.vstack((origin[:3], A[:3], B[:3], C[:3]))
-
 def translate(mode, input_matrix, d):
     Tx = np.array([
         [1, 0, 0, d],
@@ -158,6 +151,23 @@ def rotate(mode, input_matrix, angle):
         return np.matmul(Ry, input_matrix.T)
     if mode == "z":
         return np.matmul(Rz, input_matrix.T)
+
+class ButtonHandle:
+    i = 0
+    def __init__(self, value):
+        self.i = value
+
+    def buttonFunc(self, event):
+        if self.i == 0:
+            print("turning off~")
+            bVectors.label.set_text("ON")
+            self.i = 1
+        elif self.i == 1:
+            print("turning on~")
+            bVectors.label.set_text("OFF")
+            self.i = 0
+
+        plt.draw()
 
 # -------------
 matrix_one = np.array([
@@ -218,6 +228,15 @@ slider_fi2 = Slider(plt.axes([0.25, 0.03, 0.65, 0.03]), f'f2', fi2_min, fi2_max,
 slider_fi3 = Slider(plt.axes([0.25, 0, 0.65, 0.03]), f'f3', fi3_min, fi3_max, valinit=fi3)
 sliders.append((slider_fi1, slider_fi2, slider_fi3))
 
+# Buttons
+bax = plt.axes([0.05, 0.05, 0.15, 0.075])
+bVectors = Button(bax, label="Vectors OFF")
+print(bVectors.label.get_text)
+
+bh = ButtonHandle(0)
+bVectors.on_clicked(bh.buttonFunc)
+print(bVectors.label.get_text)
+
 for slider_fi1, slider_fi2, slider_fi3 in sliders:
 
     # posielame parametre kvoli shadowing / global word
@@ -229,7 +248,7 @@ for slider_fi1, slider_fi2, slider_fi3 in sliders:
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
-ax.set_title('roboticky manipulator 3D', loc='center', fontsize=25)
+ax.set_title('roboticky manipulator 3D', loc='center', fontsize=30)
 ax.axis('equal')
 fig.subplots_adjust(top=0.9, bottom=0.15)
 
