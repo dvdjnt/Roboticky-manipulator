@@ -34,23 +34,73 @@ def calculateC(origin, fi1, fi2, fi3, l2, l3):
     ])
     return np.matmul(C_matrix, origin.T)
 # Update the plot whenever a slider value changes
-def update(val, points):
-    # points not used??? check!
+def translate(mode, input_matrix, d):
+    Tx = np.array([
+        [1, 0, 0, d],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]])
 
-    points = calculatePoints(slider_fi1.val, slider_fi2.val, slider_fi3.val, l1, l2, l3)
+    Ty = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, d],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]])
 
-    scatter._offsets3d = (points[:, 0], points[:, 1], points[:, 2])
+    Tz = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, d],
+        [0, 0, 0, 1]])
 
-    print(points)
+    if mode == "x":
+        return np.matmul(Tx, input_matrix.T)
+    if mode == "y":
+        return np.matmul(Ty, input_matrix.T)
+    if mode == "z":
+        return np.matmul(Tz, input_matrix.T)
+def rotate(mode, input_matrix, angle):
+    Rx = np.array([
+        [1, 0, 0, 0],
+        [0, np.cos(angle), -1 * (np.sin(angle)), 0],
+        [0, np.sin(angle), np.cos(angle), 0],
+        [0, 0, 0, 1]])
 
-    for i in range(len(lines)):
-        xs = [points[i, 0], points[i+1, 0]]
-        ys = [points[i, 1], points[i+1, 1]]
-        zs = [points[i, 2], points[i+1, 2]]
-        lines[i].set_data(xs, ys)
-        lines[i].set_3d_properties(zs)
-    fig.canvas.draw_idle()
+    Ry = np.array([
+        [np.cos(angle), 0, np.sin(angle), 0],
+        [0, 1, 0, 0],
+        [-1 * (np.sin(angle)), 0, np.cos(angle), 0],
+        [0, 0, 0, 1]])
 
+    Rz = np.array([
+        [np.cos(angle), -1 * (np.sin(angle)), 0, 0],
+        [np.sin(angle), np.cos(angle), 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]])
+
+    if mode == "x":
+        return np.matmul(Rx, input_matrix.T)
+    if mode == "y":
+        return np.matmul(Ry, input_matrix.T)
+    if mode == "z":
+        return np.matmul(Rz, input_matrix.T)
+class ButtonHandle:
+    i = 0
+
+    def __init__(self, value):
+        self.i = value
+
+    def buttonFunc(self, event):
+        if self.i == 0:
+            print("turning off~")
+            bVectors.label.set_text("ON")
+            self.i = 1
+        elif self.i == 1:
+            print("turning on~")
+            bVectors.label.set_text("OFF")
+            self.i = 0
+
+        plt.draw()
 def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
     fi1 = deg2rad(fi1)
     fi2 = deg2rad(fi2)
@@ -59,7 +109,12 @@ def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
     origin = np.array([0, 0, 0, 1])
 
     # vectors of coordinate system
-    relativeSystem = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+    relativeSystem = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ])
 
     # postupne: -> posuvat si origin
     # transformujeme postupne body v serii
@@ -100,75 +155,22 @@ def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
     C = calculateC(origin, fi1, fi2, fi3, l2, l3)
 
     return np.vstack((origin[:3], A[:3], B[:3], C[:3]))
-def translate(mode, input_matrix, d):
-    Tx = np.array([
-        [1, 0, 0, d],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]])
-    
-    Ty = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, d],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]])
-    
-    Tz = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, d],
-        [0, 0, 0, 1]])
-    
-    if mode == "x":
-        return np.matmul(Tx, input_matrix.T)
-    if mode == "y":
-        return np.matmul(Ty, input_matrix.T)
-    if mode == "z":
-        return np.matmul(Tz, input_matrix.T)
-def rotate(mode, input_matrix, angle):
+def update(val, points):
+    # points not used??? check!
 
-    Rx = np.array([
-        [1, 0, 0, 0],
-        [0, np.cos(angle), -1*(np.sin(angle)), 0],
-        [0, np.sin(angle), np.cos(angle), 0],
-        [0, 0, 0, 1]])
-    
-    Ry = np.array([
-        [np.cos(angle), 0, np.sin(angle), 0],
-        [0, 1, 0, 0],
-        [-1*(np.sin(angle)), 0, np.cos(angle), 0],
-        [0, 0, 0, 1]])
-    
-    Rz = np.array([
-        [np.cos(angle), -1*(np.sin(angle)), 0, 0],
-        [np.sin(angle), np.cos(angle), 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]])
-    
-    if mode == "x":
-        return np.matmul(Rx, input_matrix.T)
-    if mode == "y":
-        return np.matmul(Ry, input_matrix.T)
-    if mode == "z":
-        return np.matmul(Rz, input_matrix.T)
+    points = calculatePoints(slider_fi1.val, slider_fi2.val, slider_fi3.val, l1, l2, l3)
+    # pridat vykreslenie vektorov
+    scatter._offsets3d = (points[:, 0], points[:, 1], points[:, 2])
 
-class ButtonHandle:
-    i = 0
-    def __init__(self, value):
-        self.i = value
+    print(points)
 
-    def buttonFunc(self, event):
-        if self.i == 0:
-            print("turning off~")
-            bVectors.label.set_text("ON")
-            self.i = 1
-        elif self.i == 1:
-            print("turning on~")
-            bVectors.label.set_text("OFF")
-            self.i = 0
-
-        plt.draw()
-
+    for i in range(len(lines)):
+        xs = [points[i, 0], points[i+1, 0]]
+        ys = [points[i, 1], points[i+1, 1]]
+        zs = [points[i, 2], points[i+1, 2]]
+        lines[i].set_data(xs, ys)
+        lines[i].set_3d_properties(zs)
+    fig.canvas.draw_idle()
 # -------------
 matrix_one = np.array([
     [1, 0, 0],
@@ -219,7 +221,7 @@ for i in range(len(points)-1):
     line, = ax.plot(xs, ys, zs)
     lines.append(line)
 
-# Define sliders for each point
+# sliders
 sliders = []
 
 # plt.axes([left, bottom, width, height], ...) - suradnice pre box
@@ -228,7 +230,7 @@ slider_fi2 = Slider(plt.axes([0.25, 0.03, 0.65, 0.03]), f'f2', fi2_min, fi2_max,
 slider_fi3 = Slider(plt.axes([0.25, 0, 0.65, 0.03]), f'f3', fi3_min, fi3_max, valinit=fi3)
 sliders.append((slider_fi1, slider_fi2, slider_fi3))
 
-# Buttons
+# buttons
 bax = plt.axes([0.05, 0.05, 0.15, 0.075])
 bVectors = Button(bax, label="Vectors OFF")
 print(bVectors.label.get_text)
@@ -238,8 +240,7 @@ bVectors.on_clicked(bh.buttonFunc)
 print(bVectors.label.get_text)
 
 for slider_fi1, slider_fi2, slider_fi3 in sliders:
-
-    # posielame parametre kvoli shadowing / global word
+    # posielame parametre kvoli shadowing
     slider_fi1.on_changed(lambda val: update(val, points))
     slider_fi2.on_changed(lambda val: update(val, points))
     slider_fi3.on_changed(lambda val: update(val, points))
@@ -252,5 +253,5 @@ ax.set_title('roboticky manipulator 3D', loc='center', fontsize=30)
 ax.axis('equal')
 fig.subplots_adjust(top=0.9, bottom=0.15)
 
-# Show the plot
+# render
 plt.show()
