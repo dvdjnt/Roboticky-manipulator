@@ -4,42 +4,40 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
 """
-skusit transformacie po jednom bode, po jednej transformacii
-najprv translate potom rotate? asi nooo nehehehe
-
+author: David Janto
+date: april 2023
 """
+
 def deg2rad(deg):
     return (deg/180)*np.pi
 
+def calculateA(origin, l1):
+    A_matrix = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, l1],
+        [0, 0, 0, 1]])
+    return np.matmul(A_matrix, origin.T)
+
 def calculateB(origin, fi1, fi2, l2):
-    d = l2+l1
-    print(l2+l1)
     B_matrix = np.array([
-        [np.cos(fi2), -np.sin(fi2), 0, 0],
-        [np.cos(fi1)*np.sin(fi2), np.cos(fi1)*np.cos(fi2), -np.sin(fi1)*d, 0],
-        [np.sin(fi1)*np.sin(fi2), np.sin(fi1)*np.cos(fi2), np.cos(fi1)*d, 0],
+        [np.cos(fi1), -np.sin(fi1)*np.cos(fi2), np.sin(fi1)*np.sin(fi2), np.sin(fi1)*np.sin(fi2)*l2],
+        [np.sin(fi1), np.cos(fi1)*np.cos(fi2), -np.sin(fi2)*np.cos(fi1), -np.sin(fi2)*np.cos(fi1)*l2],
+        [0, np.sin(fi2), np.cos(fi2), l2*np.cos(fi2)+l1],
         [0, 0, 0, 1]
     ])
     return np.matmul(B_matrix, origin.T)
 
-def calculateB1(origin, fi1, fi2, l2):
-    d = l2
-    B_matrix = np.array([
-        [np.cos(fi2), -np.sin(fi2), 0, 0],
-        [np.cos(fi1)*np.sin(fi2), np.cos(fi1)*np.cos(fi2), -np.sin(fi1), 0],
-        [np.sin(fi1)*np.sin(fi2), np.sin(fi1)*np.cos(fi2), np.cos(fi1), 0],
-        [0, 0, 0, d]
+def calculateC(origin, fi1, fi2, fi3, l2, l3):
+    C_matrix = np.array([
+        [np.cos(fi1), np.sin(fi1)*(-np.cos(fi2+fi3)), np.sin(fi1)*np.sin(fi2+fi3), np.sin(fi1)*(l3*(np.sin(fi2+fi3))+l2*np.sin(fi2))],
+        [np.sin(fi1), np.cos(fi1)*np.cos(fi2+fi3), -np.cos(fi1)*np.sin(fi2+fi3), -l3*np.cos(fi1)*np.sin(fi2+fi3)-np.sin(fi2)*np.cos(fi1)*l2],
+        [0, np.sin(fi2+fi3), np.cos(fi2+fi3), l3*np.cos(fi2+fi3)+l2*np.cos(fi2)+l1],
+        [0, 0, 0, 1]
     ])
-    return np.matmul(B_matrix, origin.T)
+    return np.matmul(C_matrix, origin.T)
 
-def calculateA(origin, l1):
-    d = l1
-    Tz = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, d],
-        [0, 0, 0, 1]])
-    return np.matmul(Tz, origin.T)
+
 
 # Update the plot whenever a slider value changes
 def update(val, points):
@@ -80,29 +78,32 @@ def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
     # B - translate(z,l2)->rotate(x,fi2)->rotate(y,fi1) od A
     # C - translate(z,l3)->rotate(x,fi3)
 
-    currentPoint = origin
-    currentPoint = translate("z", currentPoint, l3)
-    currentPoint = rotate("x", currentPoint, fi3)
-
-    currentPoint = translate("z", currentPoint, l2)
-    currentPoint = rotate("x", currentPoint, fi2)
-    currentPoint = rotate("z", currentPoint, fi1)
-
-    currentPoint = translate("z", currentPoint, l1)
-    C = currentPoint
-    # ----------------------------------------------------
-    currentPoint = origin
-
-    currentPoint = translate("z", currentPoint, l2)
-    currentPoint = rotate("x", currentPoint, fi2)
-    currentPoint = rotate("z", currentPoint, fi1)
-
-    currentPoint = translate("z", currentPoint, l1)
-    B = currentPoint
-    # ---------------------------------------------------
-    currentPoint = origin
-    currentPoint = translate("z", currentPoint, l1)
-    A = currentPoint
+    # currentPoint = origin
+    # currentPoint = translate("z", currentPoint, l3)
+    # currentPoint = rotate("x", currentPoint, fi3)
+    #
+    # currentPoint = translate("z", currentPoint, l2)
+    # currentPoint = rotate("x", currentPoint, fi2)
+    # currentPoint = rotate("z", currentPoint, fi1)
+    #
+    # currentPoint = translate("z", currentPoint, l1)
+    # C = currentPoint
+    # # ----------------------------------------------------
+    # currentPoint = origin
+    #
+    # currentPoint = translate("z", currentPoint, l2)
+    # currentPoint = rotate("x", currentPoint, fi2)
+    # currentPoint = rotate("z", currentPoint, fi1)
+    #
+    # currentPoint = translate("z", currentPoint, l1)
+    # B = currentPoint
+    # # ---------------------------------------------------
+    # currentPoint = origin
+    # currentPoint = translate("z", currentPoint, l1)
+    # A = currentPoint
+    A = calculateA(origin, l1)
+    B = calculateB(origin,fi1, fi2, l2)
+    C = calculateC(origin, fi1, fi2, fi3, l2, l3)
 
     return np.vstack((origin[:3], A[:3], B[:3], C[:3]))
 
