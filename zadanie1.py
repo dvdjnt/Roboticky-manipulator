@@ -10,7 +10,7 @@ date: april 2023
 
 def deg2rad(deg):
     return (deg / 180) * np.pi
-#test
+
 def calculateOrigin(origin, fi1, fi2, fi3, l1, l2, l3):
     fi1 = deg2rad(fi1)
     fi2 = deg2rad(fi2)
@@ -334,9 +334,9 @@ for slider_fi1, slider_fi2, slider_fi3 in sliders:
 
 # plot config
 
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_zlabel('Z')
+ax.set_xlabel('X [mm]')
+ax.set_ylabel('Y [mm]')
+ax.set_zlabel('Z [mm]')
 ax.set_title('Roboticky manipulator 3D', loc='center', fontsize=30)
 ax.axis('equal')
 fig.subplots_adjust(top=0.9, bottom=0.15)
