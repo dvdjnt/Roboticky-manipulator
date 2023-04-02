@@ -1,7 +1,6 @@
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
 from matplotlib.widgets import Button
-from mpl_toolkits.mplot3d.art3d import Line3D, Path3DCollection
 import numpy as np
 
 """
@@ -64,97 +63,9 @@ def calculateC(origin, fi1, fi2, fi3, l1, l2, l3):
     ])
     return np.matmul(C_matrix, origin.T)
 
-#
-# def translate(mode, input_matrix, d):
-#     Tx = np.array([
-#         [1, 0, 0, d],
-#         [0, 1, 0, 0],
-#         [0, 0, 1, 0],
-#         [0, 0, 0, 1]])
-#
-#     Ty = np.array([
-#         [1, 0, 0, 0],
-#         [0, 1, 0, d],
-#         [0, 0, 1, 0],
-#         [0, 0, 0, 1]])
-#
-#     Tz = np.array([
-#         [1, 0, 0, 0],
-#         [0, 1, 0, 0],
-#         [0, 0, 1, d],
-#         [0, 0, 0, 1]])
-#
-#     if mode == "x":
-#         return np.matmul(Tx, input_matrix.T)
-#     if mode == "y":
-#         return np.matmul(Ty, input_matrix.T)
-#     if mode == "z":
-#         return np.matmul(Tz, input_matrix.T)
-#
-# def rotate(mode, input_matrix, angle):
-#     Rx = np.array([
-#         [1, 0, 0, 0],
-#         [0, np.cos(angle), -1 * (np.sin(angle)), 0],
-#         [0, np.sin(angle), np.cos(angle), 0],
-#         [0, 0, 0, 1]])
-#
-#     Ry = np.array([
-#         [np.cos(angle), 0, np.sin(angle), 0],
-#         [0, 1, 0, 0],
-#         [-1 * (np.sin(angle)), 0, np.cos(angle), 0],
-#         [0, 0, 0, 1]])
-#
-#     Rz = np.array([
-#         [np.cos(angle), -1 * (np.sin(angle)), 0, 0],
-#         [np.sin(angle), np.cos(angle), 0, 0],
-#         [0, 0, 1, 0],
-#         [0, 0, 0, 1]])
-#
-#     if mode == "x":
-#         return np.matmul(Rx, input_matrix.T)
-#     if mode == "y":
-#         return np.matmul(Ry, input_matrix.T)
-#     if mode == "z":
-#         return np.matmul(Rz, input_matrix.T)
-
 def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
 
     origin = np.array([0, 0, 0, 1])
-
-    # postupne: -> posuvat si origin
-    # transformujeme postupne body v serii
-    # rotacie vzdy robime od predchadzajuceho bodu
-    #
-    # jedna matica pre kazdy bod: -> postupne pridavat transform k resultu (ale odzadu)
-    # sekvencne ale odzadu, mozno inverzne ukony..
-
-    # A - translate(z,l1) od origin
-    # B - translate(z,l2)->rotate(x,fi2)->rotate(y,fi1) od A
-    # C - translate(z,l3)->rotate(x,fi3)
-
-    # currentPoint = origin
-    # currentPoint = translate("z", currentPoint, l3)
-    # currentPoint = rotate("x", currentPoint, fi3)
-    #
-    # currentPoint = translate("z", currentPoint, l2)
-    # currentPoint = rotate("x", currentPoint, fi2)
-    # currentPoint = rotate("z", currentPoint, fi1)
-    #
-    # currentPoint = translate("z", currentPoint, l1)
-    # C = currentPoint
-    # # ----------------------------------------------------
-    # currentPoint = origin
-    #
-    # currentPoint = translate("z", currentPoint, l2)
-    # currentPoint = rotate("x", currentPoint, fi2)
-    # currentPoint = rotate("z", currentPoint, fi1)
-    #
-    # currentPoint = translate("z", currentPoint, l1)
-    # B = currentPoint
-    # # ---------------------------------------------------
-    # currentPoint = origin
-    # currentPoint = translate("z", currentPoint, l1)
-    # A = currentPoint
 
     A = calculateA(origin, fi1, fi2, fi3, l1, l2, l3)
     B = calculateB(origin, fi1, fi2, fi3, l1, l2, l3)
@@ -198,11 +109,6 @@ def calculateWorkspaceXY(fi1_max, fi1_min, fi2_max, fi2_min, fi3_max, fi3_min, l
     # perioda vzorkovania (v uhloch)
     T = 3
 
-    # for i in range(fi1_min, fi1_max+T, T):
-    #     pointsXY_front.append(calculateC(origin, deg2rad(i), deg2rad(90), deg2rad(0), l1, l2, l3))
-    #     # plt.show()
-    # # return np.vstack((pointsXY_front))
-
     # zhora, vpred
     # +T kvoli poslednemu cislu (cely kruh)
     # indexy idu v smere hodinkovych ruciciek
@@ -237,7 +143,7 @@ def calculateWorkspaceXZ(fi1_max, fi1_min, fi2_max, fi2_min, fi3_max, fi3_min, l
     # perioda vzorkovania (v uhloch)
     T = 3
 
-# zboku, polkruznica1
+    # zboku, polkruznica1
     for i in range(fi2_min, fi2_max, T):
         pointsXZ.append(calculateC(origin, 0, i, fi3_min, l1, l2, l3))
 
@@ -291,13 +197,6 @@ class ButtonHandle:
             print("turning off~ i = " + str(self.i))
 
         fig.canvas.draw()
-        # plt.draw()
-
-
-
-    # rozdelit button func -> vektory, priestory.....
-    # do vector kliku pridat prepocitanie vektorov + draw (aktualne aj bez update)
-    # do priestor kliku iba set visible kedze to bude vyratane vzdy..
 
     def visibility(self, linesHandle, value):
         try:
@@ -310,7 +209,7 @@ class ButtonHandle:
 
 
 
-def update(val, points, buttonHandle, lines):
+def update(val, points, lines):
 
     print('points')
     print(points)
@@ -364,11 +263,6 @@ fi3 = 0
 # figure
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
-
-# ??????????????????????
-plt.xlim(-(l1+l2+100), l1+l2+100)
-plt.ylim(-(l1+l2+100), l1+l2+100)
-# plt.zlim(-(l1-l2+l3), l1+l2+l3)
 
 # calculate init points
 points = calculatePoints(fi1, fi2, fi3, l1, l2, l3)
@@ -434,17 +328,16 @@ bWorkSpace.on_clicked(bhworkspace.buttonFunc)
 
 for slider_fi1, slider_fi2, slider_fi3 in sliders:
     # posielame parametre kvoli shadowing
-    slider_fi1.on_changed(lambda val: update(val, points, bhvector, lines))
-    slider_fi2.on_changed(lambda val: update(val, points, bhvector, lines))
-    slider_fi3.on_changed(lambda val: update(val, points, bhvector, lines))
+    slider_fi1.on_changed(lambda val: update(val, points, lines))
+    slider_fi2.on_changed(lambda val: update(val, points, lines))
+    slider_fi3.on_changed(lambda val: update(val, points, lines))
 
 # plot config
-
 
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
-ax.set_title('roboticky manipulator 3D', loc='center', fontsize=30)
+ax.set_title('Roboticky manipulator 3D', loc='center', fontsize=30)
 ax.axis('equal')
 fig.subplots_adjust(top=0.9, bottom=0.15)
 
