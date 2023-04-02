@@ -28,7 +28,6 @@ def calculateA(origin, fi1, fi2, fi3, l1, l2, l3):
         [0, 0, 0, 1]])
     return np.matmul(A_matrix, origin.T)
 
-
 def calculateB(origin, fi1, fi2, fi3, l1, l2, l3):
     B_matrix = np.array([
         [np.cos(fi1), -np.sin(fi1) * np.cos(fi2), np.sin(fi1) * np.sin(fi2), np.sin(fi1) * np.sin(fi2) * l2],
@@ -37,7 +36,6 @@ def calculateB(origin, fi1, fi2, fi3, l1, l2, l3):
         [0, 0, 0, 1]
     ])
     return np.matmul(B_matrix, origin.T)
-
 
 def calculateC(origin, fi1, fi2, fi3, l1, l2, l3):
     C_matrix = np.array([
@@ -49,7 +47,6 @@ def calculateC(origin, fi1, fi2, fi3, l1, l2, l3):
         [0, 0, 0, 1]
     ])
     return np.matmul(C_matrix, origin.T)
-
 
 def translate(mode, input_matrix, d):
     Tx = np.array([
@@ -77,7 +74,6 @@ def translate(mode, input_matrix, d):
     if mode == "z":
         return np.matmul(Tz, input_matrix.T)
 
-
 def rotate(mode, input_matrix, angle):
     Rx = np.array([
         [1, 0, 0, 0],
@@ -103,26 +99,6 @@ def rotate(mode, input_matrix, angle):
         return np.matmul(Ry, input_matrix.T)
     if mode == "z":
         return np.matmul(Rz, input_matrix.T)
-
-
-class ButtonHandle:
-    i = 0
-
-    def __init__(self, value):
-        self.i = value
-
-    def buttonFunc(self, event):
-        if self.i == 0:
-            print("turning off~")
-            bVectors.label.set_text("ON")
-            self.i = 1
-        elif self.i == 1:
-            print("turning on~")
-            bVectors.label.set_text("OFF")
-            self.i = 0
-
-        plt.draw()
-
 
 def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
     fi1 = deg2rad(fi1)
@@ -172,7 +148,6 @@ def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
 
     return np.vstack((origin[:3], A[:3], B[:3], C[:3]))
 
-
 def calculateCoordinateVectors(fi1, fi2, fi3, l1, l2, l3):
     # vectors of coordinate system
     d = 50  # scaling of vector
@@ -205,8 +180,35 @@ def calculateCoordinateVectors(fi1, fi2, fi3, l1, l2, l3):
 
     return xyzAll[3:]
 
+class ButtonHandle:
+    i = None
 
-def update(val, points):
+    def __init__(self, value):
+        self.i = value
+
+    def buttonFunc(self, event):
+        if self.i == 0:
+            bVectors.label.set_text("Vectors: ON")
+            self.i = 1
+            for line in linesVectors:
+                line.set_visible(True)
+            print("turning on~ i = " + str(self.i))
+        elif self.i == 1:
+            bVectors.label.set_text("Vectors: OFF")
+            self.i = 0
+            for line in linesVectors:
+                line.set_visible(False)
+            print("turning off~ i = " + str(self.i))
+        fig.canvas.draw()
+        # plt.draw()
+
+    def getState(self):
+        if (self.i == 0):
+            return False
+        elif (self.i == 1):
+            return True
+
+def update(val, points, buttonHandle):
     # points not used??? check!
     print('points more')
     print(points)
@@ -227,9 +229,13 @@ def update(val, points):
         zs = [points[i, 2], points[i + 1, 2]]
         lines[i].set_data(xs, ys)
         lines[i].set_3d_properties(zs)
-    # fig.canvas.draw_idle()
 
-    colors = ['red', 'green', 'blue']
+    if (not buttonHandle.getState()):
+        return
+
+    for line in linesVectors:
+        line.set_visible(True)
+
     j = 0
     for i in range(0, len(points)):
         k = 0
@@ -304,6 +310,7 @@ for i in range(len(points) - 1):
     lines.append(line)
 
 # vektory smeru (posunute suradnicove systemy)
+
 colors = ['red', 'green', 'blue']
 j = 0
 for i in range(0, len(points)):
@@ -331,18 +338,18 @@ sliders.append((slider_fi1, slider_fi2, slider_fi3))
 
 # buttons
 bax = plt.axes([0.05, 0.05, 0.15, 0.075])
-bVectors = Button(bax, label="Vectors OFF")
+bVectors = Button(bax, label="Vectors: ON")
 print(bVectors.label.get_text)
 
-bh = ButtonHandle(0)
+bh = ButtonHandle(1)
 bVectors.on_clicked(bh.buttonFunc)
 print(bVectors.label.get_text)
 
 for slider_fi1, slider_fi2, slider_fi3 in sliders:
     # posielame parametre kvoli shadowing
-    slider_fi1.on_changed(lambda val: update(val, points))
-    slider_fi2.on_changed(lambda val: update(val, points))
-    slider_fi3.on_changed(lambda val: update(val, points))
+    slider_fi1.on_changed(lambda val: update(val, points, bh))
+    slider_fi2.on_changed(lambda val: update(val, points, bh))
+    slider_fi3.on_changed(lambda val: update(val, points, bh))
 
 
 # render
