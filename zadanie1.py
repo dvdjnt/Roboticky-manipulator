@@ -64,7 +64,6 @@ def calculateC(origin, fi1, fi2, fi3, l1, l2, l3):
     return np.matmul(C_matrix, origin.T)
 
 def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
-
     origin = np.array([0, 0, 0, 1])
 
     A = calculateA(origin, fi1, fi2, fi3, l1, l2, l3)
@@ -87,7 +86,7 @@ def calculateCoordinateVectors(fi1, fi2, fi3, l1, l2, l3):
 
     xyzAll = np.empty((3, 4)) # preload
 
-    for i in range(0, 4):   # xyz vektorov smeru pre vsetky body do output[]
+    for i in range(0, 4):   # xyz vektorov smeru pre vsetky body
         print()
         print(i)
         x = calculate_map[i](relativeSystem[0], fi1, fi2, fi3, l1, l2, l3)
@@ -109,13 +108,13 @@ def calculateWorkspaceXY(fi1_max, fi1_min, fi2_max, fi2_min, fi3_max, fi3_min, l
     # perioda vzorkovania (v uhloch)
     T = 3
 
-    # zhora, vpred
     # +T kvoli poslednemu cislu (cely kruh)
-    # indexy idu v smere hodinkovych ruciciek
+
+    # zhora, vzad
     for i in range(fi1_min, fi1_max+T, T):
         pointsXY.append(calculateC(origin, i, fi2_min, 0, l1, l2, l3))
 
-    # zhora, vzadu
+    # zhora, vpred
     for i in range(fi1_min, fi1_max+T, T):
         pointsXY.append(calculateC(origin, i, 90, 0, l1, l2, l3))
 
@@ -147,7 +146,7 @@ def calculateWorkspaceXZ(fi1_max, fi1_min, fi2_max, fi2_min, fi3_max, fi3_min, l
     for i in range(fi2_min, fi2_max, T):
         pointsXZ.append(calculateC(origin, 0, i, fi3_min, l1, l2, l3))
 
-    # zboku, polkruznica2
+    # zboku, kruznica2
     for i in range(fi3_min, fi3_max+T, T):
         pointsXZ.append(calculateC(origin, 0, fi2_max, i, l1, l2, l3))
 
@@ -156,7 +155,6 @@ def calculateWorkspaceXZ(fi1_max, fi1_min, fi2_max, fi2_min, fi3_max, fi3_min, l
 
     for i in reversed(range(fi3_min, fi3_max, T)):
         pointsXZ.append(calculateC(origin, 0, fi2_min, i, l1, l2, l3))
-
 
     pointsXZ = np.vstack((pointsXZ))
     scatter = ax.scatter(0, pointsXZ[:, 1], pointsXZ[:, 2], color='purple', s=10)
@@ -184,6 +182,7 @@ class ButtonHandle:
         elif (self.i == 1):
             return True
 
+    # prepis buttonu
     def buttonFunc(self, event):
         if self.i == 0:
             self.labelHandle.label.set_text(self.name+": ON")
@@ -198,6 +197,7 @@ class ButtonHandle:
 
         fig.canvas.draw()
 
+    # visiblity on/off
     def visibility(self, linesHandle, value):
         try:
             for i in range(len(linesHandle)):
@@ -207,19 +207,14 @@ class ButtonHandle:
             for j in range(len(linesHandle)):
                 linesHandle[j].set_visible(value)
 
-
-
 def update(val, points, lines):
-
-    print('points')
-    print(points)
     points = calculatePoints(slider_fi1.val, slider_fi2.val, slider_fi3.val, l1, l2, l3)
     vectors = calculateCoordinateVectors(slider_fi1.val, slider_fi2.val, slider_fi3.val, l1, l2, l3)
 
+    #body
     scatter._offsets3d = (points[:, 0], points[:, 1], points[:, 2])
 
-    print(points)
-
+    # clanky
     for i in range(len(lines)):
         xs = [points[i, 0], points[i + 1, 0]]
         ys = [points[i, 1], points[i + 1, 1]]
@@ -227,6 +222,7 @@ def update(val, points, lines):
         lines[i].set_data(xs, ys)
         lines[i].set_3d_properties(zs)
 
+    # vektory
     j = 0
     for i in range(0, len(points)):
         k = 0
@@ -253,9 +249,9 @@ fi2_min = -55
 fi2_max = 125
 
 fi3_min = 0
-fi3_max = 150  # zadanie
+fi3_max = 150
 
-# uhly
+# zaciatocne uhly
 fi1 = 0
 fi2 = 0
 fi3 = 0
@@ -264,21 +260,18 @@ fi3 = 0
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
 
-# calculate init points
+# zaciatocne body
 points = calculatePoints(fi1, fi2, fi3, l1, l2, l3)
-print('points')
-print(points)
 vectors = calculateCoordinateVectors(fi1, fi2, fi3, l1, l2, l3)
-print('vectors')
-print(vectors)
 
-# plot joints
+# vykreslovanie klbov
 scatter = ax.scatter(points[:, 0], points[:, 1], points[:, 2], color='black', s=35)
 
-# lines between joints
+# usecky medzi klbmi (clanky)
 lines = []
 linesVectors = []
 
+# vykreslovanie bodov
 for i in range(len(points) - 1):
     xs = [points[i, 0], points[i + 1, 0]]
     ys = [points[i, 1], points[i + 1, 1]]
@@ -289,6 +282,7 @@ for i in range(len(points) - 1):
 # vektory smeru (posunute suradnicove systemy)
 colors = ['red', 'green', 'blue']
 j = 0
+# vykreslovanie vektorov
 for i in range(0, len(points)):
     k = 0
     while k < 3:
@@ -307,7 +301,7 @@ workspaceXY_scatter = calculateWorkspaceXY(fi1_max, fi1_min, fi2_max, fi2_min, f
 # sliders
 sliders = []
 
-# plt.axes([left, bottom, width, height], ...) - suradnice pre box
+# plt.axes([left, bottom, width, height], ...) - suradnice pre box, valinit = prva hodnota
 slider_fi1 = Slider(plt.axes([0.3, 0.06, 0.65, 0.03]), f'fi1', fi1_min, fi1_max, valinit=fi1)
 slider_fi2 = Slider(plt.axes([0.3, 0.03, 0.65, 0.03]), f'fi2', fi2_min, fi2_max, valinit=fi2)
 slider_fi3 = Slider(plt.axes([0.3, 0, 0.65, 0.03]), f'fi3', fi3_min, fi3_max, valinit=fi3)
@@ -320,12 +314,14 @@ bVectors = Button(bax, label='Vectors: ON')
 bax = plt.axes([0.02, 0.2, 0.2, 0.08])
 bWorkSpace = Button(bax, label='Workspace: ON')
 
+# button handlers
 bhvector = ButtonHandle(1, 'Vectors', bVectors, linesVectors)
 bhworkspace = ButtonHandle(1, 'Workspace', bWorkSpace, [workspaceXY_scatter, workspaceXZ_scatter])
 
 bVectors.on_clicked(bhvector.buttonFunc)
 bWorkSpace.on_clicked(bhworkspace.buttonFunc)
 
+# slider update
 for slider_fi1, slider_fi2, slider_fi3 in sliders:
     # posielame parametre kvoli shadowing
     slider_fi1.on_changed(lambda val: update(val, points, lines))
@@ -333,7 +329,6 @@ for slider_fi1, slider_fi2, slider_fi3 in sliders:
     slider_fi3.on_changed(lambda val: update(val, points, lines))
 
 # plot config
-
 ax.set_xlabel('X [mm]')
 ax.set_ylabel('Y [mm]')
 ax.set_zlabel('Z [mm]')
@@ -343,4 +338,3 @@ fig.subplots_adjust(top=0.9, bottom=0.15)
 
 # render
 plt.show()
-print('wait')
