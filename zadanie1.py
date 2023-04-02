@@ -10,7 +10,7 @@ date: april 2023
 
 def deg2rad(deg):
     return (deg / 180) * np.pi
-
+#test
 def calculateOrigin(origin, fi1, fi2, fi3, l1, l2, l3):
     fi1 = deg2rad(fi1)
     fi2 = deg2rad(fi2)
