@@ -8,7 +8,6 @@ author: David Janto
 date: april 2023
 """
 
-
 def deg2rad(deg):
     return (deg / 180) * np.pi
 
@@ -21,6 +20,10 @@ def calculateOrigin(origin, fi1, fi2, fi3, l1, l2, l3):
     return np.matmul(origin_matrix, origin.T)
 
 def calculateA(origin, fi1, fi2, fi3, l1, l2, l3):
+    fi1 = deg2rad(fi1)
+    fi2 = deg2rad(fi2)
+    fi3 = deg2rad(fi3)
+
     A_matrix = np.array([
         [np.cos(fi1), -np.sin(fi1), 0, 0],
         [np.sin(fi1), np.cos(fi1), 0, 0],
@@ -29,6 +32,10 @@ def calculateA(origin, fi1, fi2, fi3, l1, l2, l3):
     return np.matmul(A_matrix, origin.T)
 
 def calculateB(origin, fi1, fi2, fi3, l1, l2, l3):
+    fi1 = deg2rad(fi1)
+    fi2 = deg2rad(fi2)
+    fi3 = deg2rad(fi3)
+
     B_matrix = np.array([
         [np.cos(fi1), -np.sin(fi1) * np.cos(fi2), np.sin(fi1) * np.sin(fi2), np.sin(fi1) * np.sin(fi2) * l2],
         [np.sin(fi1), np.cos(fi1) * np.cos(fi2), -np.sin(fi2) * np.cos(fi1), -np.sin(fi2) * np.cos(fi1) * l2],
@@ -38,6 +45,10 @@ def calculateB(origin, fi1, fi2, fi3, l1, l2, l3):
     return np.matmul(B_matrix, origin.T)
 
 def calculateC(origin, fi1, fi2, fi3, l1, l2, l3):
+    fi1 = deg2rad(fi1)
+    fi2 = deg2rad(fi2)
+    fi3 = deg2rad(fi3)
+
     C_matrix = np.array([
         [np.cos(fi1), np.sin(fi1) * (-np.cos(fi2 + fi3)), np.sin(fi1) * np.sin(fi2 + fi3),
          np.sin(fi1) * (l3 * (np.sin(fi2 + fi3)) + l2 * np.sin(fi2))],
@@ -48,57 +59,58 @@ def calculateC(origin, fi1, fi2, fi3, l1, l2, l3):
     ])
     return np.matmul(C_matrix, origin.T)
 
-def translate(mode, input_matrix, d):
-    Tx = np.array([
-        [1, 0, 0, d],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]])
-
-    Ty = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, d],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]])
-
-    Tz = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, d],
-        [0, 0, 0, 1]])
-
-    if mode == "x":
-        return np.matmul(Tx, input_matrix.T)
-    if mode == "y":
-        return np.matmul(Ty, input_matrix.T)
-    if mode == "z":
-        return np.matmul(Tz, input_matrix.T)
-
-def rotate(mode, input_matrix, angle):
-    Rx = np.array([
-        [1, 0, 0, 0],
-        [0, np.cos(angle), -1 * (np.sin(angle)), 0],
-        [0, np.sin(angle), np.cos(angle), 0],
-        [0, 0, 0, 1]])
-
-    Ry = np.array([
-        [np.cos(angle), 0, np.sin(angle), 0],
-        [0, 1, 0, 0],
-        [-1 * (np.sin(angle)), 0, np.cos(angle), 0],
-        [0, 0, 0, 1]])
-
-    Rz = np.array([
-        [np.cos(angle), -1 * (np.sin(angle)), 0, 0],
-        [np.sin(angle), np.cos(angle), 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]])
-
-    if mode == "x":
-        return np.matmul(Rx, input_matrix.T)
-    if mode == "y":
-        return np.matmul(Ry, input_matrix.T)
-    if mode == "z":
-        return np.matmul(Rz, input_matrix.T)
+#
+# def translate(mode, input_matrix, d):
+#     Tx = np.array([
+#         [1, 0, 0, d],
+#         [0, 1, 0, 0],
+#         [0, 0, 1, 0],
+#         [0, 0, 0, 1]])
+#
+#     Ty = np.array([
+#         [1, 0, 0, 0],
+#         [0, 1, 0, d],
+#         [0, 0, 1, 0],
+#         [0, 0, 0, 1]])
+#
+#     Tz = np.array([
+#         [1, 0, 0, 0],
+#         [0, 1, 0, 0],
+#         [0, 0, 1, d],
+#         [0, 0, 0, 1]])
+#
+#     if mode == "x":
+#         return np.matmul(Tx, input_matrix.T)
+#     if mode == "y":
+#         return np.matmul(Ty, input_matrix.T)
+#     if mode == "z":
+#         return np.matmul(Tz, input_matrix.T)
+#
+# def rotate(mode, input_matrix, angle):
+#     Rx = np.array([
+#         [1, 0, 0, 0],
+#         [0, np.cos(angle), -1 * (np.sin(angle)), 0],
+#         [0, np.sin(angle), np.cos(angle), 0],
+#         [0, 0, 0, 1]])
+#
+#     Ry = np.array([
+#         [np.cos(angle), 0, np.sin(angle), 0],
+#         [0, 1, 0, 0],
+#         [-1 * (np.sin(angle)), 0, np.cos(angle), 0],
+#         [0, 0, 0, 1]])
+#
+#     Rz = np.array([
+#         [np.cos(angle), -1 * (np.sin(angle)), 0, 0],
+#         [np.sin(angle), np.cos(angle), 0, 0],
+#         [0, 0, 1, 0],
+#         [0, 0, 0, 1]])
+#
+#     if mode == "x":
+#         return np.matmul(Rx, input_matrix.T)
+#     if mode == "y":
+#         return np.matmul(Ry, input_matrix.T)
+#     if mode == "z":
+#         return np.matmul(Rz, input_matrix.T)
 
 def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
     fi1 = deg2rad(fi1)
@@ -151,9 +163,6 @@ def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
 def calculateCoordinateVectors(fi1, fi2, fi3, l1, l2, l3):
     # vectors of coordinate system
     d = 50  # scaling of vector
-    fi1 = deg2rad(fi1)
-    fi2 = deg2rad(fi2)
-    fi3 = deg2rad(fi3)
 
     relativeSystem = np.array([
         [d, 0, 0, 1],
@@ -180,25 +189,71 @@ def calculateCoordinateVectors(fi1, fi2, fi3, l1, l2, l3):
 
     return xyzAll[3:]
 
+def calculateWorkspace(fi1_max, fi1_min, fi2_max, fi2_min, fi3_max, fi3_min, l1, l2, l3):
+    pointsXY_front = []
+    origin = np.array([0, 0, 0, 1])
+
+    # perioda vzorkovania (v uhloch)
+    T = 3
+
+    # for i in range(fi1_min, fi1_max+T, T):
+    #     pointsXY_front.append(calculateC(origin, deg2rad(i), deg2rad(90), deg2rad(0), l1, l2, l3))
+    #     # plt.show()
+    # # return np.vstack((pointsXY_front))
+
+    # zhora, vpred
+    # +T kvoli poslednemu cislu (cely kruh)
+    # indexy idu v smere hodinkovych ruciciek
+    for i in range(fi1_min, fi1_max+T, T):
+        pointsXY_front.append(calculateC(origin, i, fi2_min, 0, l1, l2, l3))
+
+    # zhora, vzadu
+    for i in range(fi1_min, fi1_max+T, T):
+        pointsXY_front.append(calculateC(origin, i, 90, 0, l1, l2, l3))
+
+    # zhora, sprava
+    for i in range(fi3_min, fi3_max, T):
+        pointsXY_front.append(calculateC(origin, fi1_max, 90, i, l1, l2, l3))
+
+    # zhora, zlava
+    for i in range(fi3_min, fi3_max+T, T):
+        pointsXY_front.append(calculateC(origin, fi1_min, 90, i, l1, l2, l3))
+
+    # zhora, stred
+    for i in range(fi2_min, fi2_max, T):
+        pointsXY_front.append(calculateC(origin, fi1_min, fi2_max, i, l1, l2, l3))
+
+    # # zboku, polkruznica
+    # for i in range(fi2_min, 145, T):
+    #     pointsXY_front.append(calculateC(origin, 0, deg2rad(fi2_max), deg2rad(i), l1, l2, l3))
+
+    pointsXY = np.vstack((pointsXY_front))
+    scatter_ws_f5 = ax.scatter(pointsXY[:, 0], pointsXY[:, 1], 0, color='blue', s=10)
+
 class ButtonHandle:
     i = None
+    name = None
+    labelHandle = None
+    linesHandle = None
 
-    def __init__(self, value):
+    def __init__(self, value, name, labelHandle, linesHandle):
         self.i = value
+        self.name = name
+        self.labelHandle = labelHandle
+        self.linesHandle = linesHandle
 
     def buttonFunc(self, event):
         if self.i == 0:
-            bVectors.label.set_text("Vectors: ON")
+            self.labelHandle.label.set_text(self.name+": ON")
             self.i = 1
-            for line in linesVectors:
-                line.set_visible(True)
+            self.visibility(self.linesHandle, True)
             print("turning on~ i = " + str(self.i))
         elif self.i == 1:
-            bVectors.label.set_text("Vectors: OFF")
+            self.labelHandle.label.set_text(self.name + ": OFF")
             self.i = 0
-            for line in linesVectors:
-                line.set_visible(False)
+            self.visibility(self.linesHandle, False)
             print("turning off~ i = " + str(self.i))
+
         fig.canvas.draw()
         # plt.draw()
 
@@ -207,19 +262,24 @@ class ButtonHandle:
             return False
         elif (self.i == 1):
             return True
+    def visibility(self, lines,value):
+        try:
+            for i in range(len(lines)):
+                for j in range(len(lines[i])):
+                    lines[i][j].set_visible(value)
+        except:
+            for j in range(len(lines)):
+                lines[j].set_visible(value)
+
 
 def update(val, points, buttonHandle):
-    # points not used??? check!
-    print('points more')
+
+    print('points')
     print(points)
     points = calculatePoints(slider_fi1.val, slider_fi2.val, slider_fi3.val, l1, l2, l3)
     vectors = calculateCoordinateVectors(slider_fi1.val, slider_fi2.val, slider_fi3.val, l1, l2, l3)
-    # coordinateVectors = calculateCoordinateVectors()
-    # pridat vykreslenie vektorov
-    # scatter navyse
-    scatter._offsets3d = (points[:, 0], points[:, 1], points[:, 2])
 
-    # scatter = ax.scatter(points[:, 0], points[:, 1], points[:, 2], color='black', s=35)
+    scatter._offsets3d = (points[:, 0], points[:, 1], points[:, 2])
 
     print(points)
 
@@ -233,9 +293,6 @@ def update(val, points, buttonHandle):
     if (not buttonHandle.getState()):
         return
 
-    for line in linesVectors:
-        line.set_visible(True)
-
     j = 0
     for i in range(0, len(points)):
         k = 0
@@ -247,20 +304,10 @@ def update(val, points, buttonHandle):
             linesVectors[j].set_3d_properties(zs)
             k = k + 1
             j = j + 1
-        # fig.canvas.draw_idle()
-    fig.canvas.draw()
 
-# -------------
-matrix_one = np.array([
-    [1, 0, 0],
-    [0, 1, 0],
-    [0, 0, 1]
-])
-vector_one = np.array([
-    [1],
-    [1],
-    [1]
-])
+    buttonHandle.visibility(linesVectors, True)
+
+    fig.canvas.draw()
 
 # zadanie [mm]
 l1 = 203  # 203
@@ -277,9 +324,18 @@ fi3_min = 0
 fi3_max = 150  # zadanie
 
 # uhly
-fi1 = 0
-fi2 = 0
-fi3 = 0
+fi1 = deg2rad(0)
+fi2 = deg2rad(0)
+fi3 = deg2rad(0)
+
+# figure
+fig = plt.figure()
+ax = fig.add_subplot(111, projection="3d")
+
+# ??????????????????????
+plt.xlim(-(l1+l2+100), l1+l2+100)
+plt.ylim(-(l1+l2+100), l1+l2+100)
+# plt.zlim(-(l1-l2+l3), l1+l2+l3)
 
 # calculate init points
 points = calculatePoints(fi1, fi2, fi3, l1, l2, l3)
@@ -289,19 +345,15 @@ vectors = calculateCoordinateVectors(fi1, fi2, fi3, l1, l2, l3)
 print('vectors')
 print(vectors)
 
-# figure
-fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
-
-# plot points
+# plot joints
 scatter = ax.scatter(points[:, 0], points[:, 1], points[:, 2], color='black', s=35)
-# scatter2 = ax.scatter(coordinateVectors[:, 0], coordinateVectors[:, 1], coordinateVectors[:, 2])
 
-# lines between points
+# lines between joints
 lines = []
 linesVectors = []
+linesWorkspaceXZ = []
+linesWorkspaceXY = []
 
-# body
 for i in range(len(points) - 1):
     xs = [points[i, 0], points[i + 1, 0]]
     ys = [points[i, 1], points[i + 1, 1]]
@@ -310,7 +362,6 @@ for i in range(len(points) - 1):
     lines.append(line)
 
 # vektory smeru (posunute suradnicove systemy)
-
 colors = ['red', 'green', 'blue']
 j = 0
 for i in range(0, len(points)):
@@ -324,41 +375,56 @@ for i in range(0, len(points)):
         linesVectors.append(line)
         j = j + 1
 
-# dvakrat ten isty kod vykreslenia, len v update je len refresh akoby
-# inak by zostavali veci na obrazovke
+# pracovny priestor
+calculateWorkspace(fi1_max, fi1_min, fi2_max, fi2_min, fi3_max, fi3_min, l1, l2, l3)
+# pointsXY = calculateWorkspace(fi1_max, fi1_min, fi2_max, fi2_min, fi3_max, fi3_min, l1, l2, l3)
+# scatter_ws1 = ax.scatter(pointsXY[:, 0], pointsXY[:, 1], 0, color='blue', s=10)
+#
+# for i in range(len(points) - 1):
+#     xs = [points[i, 0], points[i + 1, 0]]
+#     ys = [points[i, 1], points[i + 1, 1]]
+#     zs = [points[i, 2], points[i + 1, 2]]
+#     line, = ax.plot(xs, ys, zs, color='orange')
+#     lines.append(line)
 
 # sliders
 sliders = []
 
 # plt.axes([left, bottom, width, height], ...) - suradnice pre box
-slider_fi1 = Slider(plt.axes([0.25, 0.06, 0.65, 0.03]), f'fi1', fi1_min, fi1_max, valinit=fi1)
-slider_fi2 = Slider(plt.axes([0.25, 0.03, 0.65, 0.03]), f'f2', fi2_min, fi2_max, valinit=fi2)
-slider_fi3 = Slider(plt.axes([0.25, 0, 0.65, 0.03]), f'f3', fi3_min, fi3_max, valinit=fi3)
+slider_fi1 = Slider(plt.axes([0.3, 0.06, 0.65, 0.03]), f'fi1', fi1_min, fi1_max, valinit=fi1)
+slider_fi2 = Slider(plt.axes([0.3, 0.03, 0.65, 0.03]), f'fi2', fi2_min, fi2_max, valinit=fi2)
+slider_fi3 = Slider(plt.axes([0.3, 0, 0.65, 0.03]), f'fi3', fi3_min, fi3_max, valinit=fi3)
 sliders.append((slider_fi1, slider_fi2, slider_fi3))
 
 # buttons
-bax = plt.axes([0.05, 0.05, 0.15, 0.075])
-bVectors = Button(bax, label="Vectors: ON")
-print(bVectors.label.get_text)
+bax = plt.axes([0.02, 0.05, 0.2, 0.08])
+bVectors = Button(bax, label='Vectors: ON')
 
-bh = ButtonHandle(1)
-bVectors.on_clicked(bh.buttonFunc)
-print(bVectors.label.get_text)
+bax = plt.axes([0.02, 0.2, 0.2, 0.08])
+bWorkSpace = Button(bax, label='Workspace: OFF')
+
+bhvector = ButtonHandle(1, 'Vectors', bVectors, linesVectors)
+bhworkspace = ButtonHandle(0, 'Workspace', bWorkSpace, [linesWorkspaceXY, linesWorkspaceXY] )
+
+bVectors.on_clicked(bhvector.buttonFunc)
+bWorkSpace.on_clicked(bhworkspace.buttonFunc)
 
 for slider_fi1, slider_fi2, slider_fi3 in sliders:
     # posielame parametre kvoli shadowing
-    slider_fi1.on_changed(lambda val: update(val, points, bh))
-    slider_fi2.on_changed(lambda val: update(val, points, bh))
-    slider_fi3.on_changed(lambda val: update(val, points, bh))
+    slider_fi1.on_changed(lambda val: update(val, points, bhvector))
+    slider_fi2.on_changed(lambda val: update(val, points, bhvector))
+    slider_fi3.on_changed(lambda val: update(val, points, bhvector))
 
-
-# render
 # plot config
+
+
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
 ax.set_title('roboticky manipulator 3D', loc='center', fontsize=30)
 ax.axis('equal')
 fig.subplots_adjust(top=0.9, bottom=0.15)
+
+# render
 plt.show()
 print('wait')
