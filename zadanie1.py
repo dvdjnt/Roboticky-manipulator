@@ -13,12 +13,17 @@ def deg2rad(deg):
     return (deg / 180) * np.pi
 
 def calculateOrigin(origin, fi1, fi2, fi3, l1, l2, l3):
-    return origin
+    origin_matrix = np.array([
+        [np.cos(fi1), -1 * (np.sin(fi1)), 0, 0],
+        [np.sin(fi1), np.cos(fi1), 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]])
+    return np.matmul(origin_matrix, origin.T)
 
 def calculateA(origin, fi1, fi2, fi3, l1, l2, l3):
     A_matrix = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
+        [np.cos(fi1), -np.sin(fi1), 0, 0],
+        [np.sin(fi1), np.cos(fi1), 0, 0],
         [0, 0, 1, l1],
         [0, 0, 0, 1]])
     return np.matmul(A_matrix, origin.T)
