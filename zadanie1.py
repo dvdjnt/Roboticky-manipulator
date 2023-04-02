@@ -12,6 +12,10 @@ def deg2rad(deg):
     return (deg / 180) * np.pi
 
 def calculateOrigin(origin, fi1, fi2, fi3, l1, l2, l3):
+    fi1 = deg2rad(fi1)
+    fi2 = deg2rad(fi2)
+    fi3 = deg2rad(fi3)
+
     origin_matrix = np.array([
         [np.cos(fi1), -1 * (np.sin(fi1)), 0, 0],
         [np.sin(fi1), np.cos(fi1), 0, 0],
@@ -113,9 +117,6 @@ def calculateC(origin, fi1, fi2, fi3, l1, l2, l3):
 #         return np.matmul(Rz, input_matrix.T)
 
 def calculatePoints(fi1, fi2, fi3, l1, l2, l3):
-    fi1 = deg2rad(fi1)
-    fi2 = deg2rad(fi2)
-    fi3 = deg2rad(fi3)
 
     origin = np.array([0, 0, 0, 1])
 
@@ -324,9 +325,9 @@ fi3_min = 0
 fi3_max = 150  # zadanie
 
 # uhly
-fi1 = deg2rad(0)
-fi2 = deg2rad(0)
-fi3 = deg2rad(0)
+fi1 = 0
+fi2 = 0
+fi3 = 0
 
 # figure
 fig = plt.figure()
