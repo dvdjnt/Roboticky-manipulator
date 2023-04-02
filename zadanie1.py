@@ -328,9 +328,6 @@ def update(val, points, buttonHandle, lines):
         lines[i].set_data(xs, ys)
         lines[i].set_3d_properties(zs)
 
-    if (buttonHandle.getName() == 'Vectors' and not buttonHandle.getState()):
-        return
-
     j = 0
     for i in range(0, len(points)):
         k = 0
@@ -343,7 +340,6 @@ def update(val, points, buttonHandle, lines):
             k = k + 1
             j = j + 1
 
-    buttonHandle.visibility(linesVectors, True)
     fig.canvas.draw()
 
 # zadanie [mm]
