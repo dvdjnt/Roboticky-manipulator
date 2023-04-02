@@ -239,11 +239,18 @@ def calculateWorkspaceXZ(fi1_max, fi1_min, fi2_max, fi2_min, fi3_max, fi3_min, l
 
 # zboku, polkruznica1
     for i in range(fi2_min, fi2_max, T):
-        pointsXZ.append(calculateC(origin, 0, i, 0, l1, l2, l3))
+        pointsXZ.append(calculateC(origin, 0, i, fi3_min, l1, l2, l3))
 
     # zboku, polkruznica2
     for i in range(fi3_min, fi3_max+T, T):
         pointsXZ.append(calculateC(origin, 0, fi2_max, i, l1, l2, l3))
+
+    for i in reversed(range(fi2_min, fi2_max, T)):
+        pointsXZ.append(calculateC(origin, 0, i, fi3_max, l1, l2, l3))
+
+    for i in reversed(range(fi3_min, fi3_max, T)):
+        pointsXZ.append(calculateC(origin, 0, fi2_min, i, l1, l2, l3))
+
 
     pointsXZ = np.vstack((pointsXZ))
     scatter = ax.scatter(0, pointsXZ[:, 1], pointsXZ[:, 2], color='purple', s=10)
@@ -423,8 +430,8 @@ bVectors = Button(bax, label='Vectors: ON')
 bax = plt.axes([0.02, 0.2, 0.2, 0.08])
 bWorkSpace = Button(bax, label='Workspace: ON')
 
-bhvector = ButtonHandle(0, 'Vectors', bVectors, linesVectors)
-bhworkspace = ButtonHandle(0, 'Workspace', bWorkSpace, [workspaceXY_scatter, workspaceXZ_scatter])
+bhvector = ButtonHandle(1, 'Vectors', bVectors, linesVectors)
+bhworkspace = ButtonHandle(1, 'Workspace', bWorkSpace, [workspaceXY_scatter, workspaceXZ_scatter])
 
 bVectors.on_clicked(bhvector.buttonFunc)
 bWorkSpace.on_clicked(bhworkspace.buttonFunc)
