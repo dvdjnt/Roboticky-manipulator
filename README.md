@@ -1,4 +1,4 @@
-# Roboticky manipulator
+# Robotický manipulátor
 Tento python program vykresľuje kĺbový roboticky manipulátor, jeho pohyby, vektory pomocných súradnicových systémov a pracovný priestor v prehľadnej 3D aplikácii. Umožnuje meniť uhly rotácii pomocou sliderov a vykresľovať tak polohu v reálnom case. K dispozícii sú aj buttony, ktoré togglujú viditeľnosť rôznych elementov.
 
 ## Robotic arm simulation [ENG]
